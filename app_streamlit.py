@@ -101,19 +101,32 @@ data = {
     
 df = pd.DataFrame([data])
 
-model_cls = load_models()
-
 st.divider()
-    
-    # Tombol Aksi Prediksi
-if st.button("Analyze Financial Profile", type="primary", use_container_width=True):
-        
-    hasil_kategori = model_cls.predict(df)[0]
-        
-    st.subheader("Hasil Analisis Model:")
-    col_hasil1 = st.columns(1)
-        
-    with col_hasil1:
-        st.metric(label="Prediksi Payment of Minimum Amount", value=str(hasil_kategori))
 
+if st.button("Analyze Financial Profile", type="primary", use_container_width=True):
+    with st.spinner("Mengirim data ke SageMaker Endpoint..."):
+        try:
+            # Mengubah baris dataframe menjadi list untuk dikirim ke SageMaker
+            # Catatan: Pastikan urutan fitur ini sama persis dengan urutan saat training model di SageMaker.
+            feature_list = df.iloc[0].tolist()
+            
+            # Memanggil fungsi SageMaker
+            response = invoke_endpoint(feature_list)
+            
+            # Mengambil hasil prediksi dari response JSON SageMaker
+            # Catatan: Sesuaikan key 'predictions' dengan format output model Anda (misal: response['predictions'][0] atau langsung response[0])
+            if isinstance(response, dict) and "predictions" in response:
+                hasil_kategori = response["predictions"][0]
+            else:
+                hasil_kategori = response
+                
+            st.subheader("Hasil Analisis Model:")
+            st.metric(label="Prediksi Status / Credit Score", value=str(hasil_kategori))
+            
+        except NoCredentialsError:
+            st.error("AWS Credentials tidak ditemukan. Pastikan AWS CLI sudah terkonfigurasi atau Instance Profile sudah aktif.")
+        except ClientError as e:
+            st.error(f"Gagal memanggil SageMaker Endpoint: {e}")
+        except Exception as e:
+            st.error(f"Terjadi kesalahan: {e}")
 
