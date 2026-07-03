@@ -106,15 +106,10 @@ st.divider()
 if st.button("Analyze Financial Profile", type="primary", use_container_width=True):
     with st.spinner("Mengirim data ke SageMaker Endpoint..."):
         try:
-            # Mengubah baris dataframe menjadi list untuk dikirim ke SageMaker
-            # Catatan: Pastikan urutan fitur ini sama persis dengan urutan saat training model di SageMaker.
             feature_list = df.iloc[0].tolist()
             
-            # Memanggil fungsi SageMaker
             response = invoke_endpoint(feature_list)
             
-            # Mengambil hasil prediksi dari response JSON SageMaker
-            # Catatan: Sesuaikan key 'predictions' dengan format output model Anda (misal: response['predictions'][0] atau langsung response[0])
             if isinstance(response, dict) and "predictions" in response:
                 hasil_kategori = response["predictions"][0]
             else:
