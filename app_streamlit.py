@@ -9,7 +9,7 @@ boto3 picks up AWS credentials from:
 
 import json
 import os
-
+import pandas as pd
 import boto3
 import streamlit as st
 from botocore.exceptions import ClientError, NoCredentialsError
